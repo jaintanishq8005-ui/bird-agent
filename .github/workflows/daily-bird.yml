@@ -1,0 +1,42 @@
+name: Daily Bird
+on:
+  schedule:
+    - cron: "0 1 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (no email, no sheet write)"
+        default: "0"
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r requirements.txt
+      - run: python -u agent.py
+        env:
+          PYTHONUNBUFFERED: "1"
+          EBIRD_API_KEY: ${{ secrets.EBIRD_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          SCOPE: auto
+          DRY_RUN: ${{ github.event.inputs.dry_run }}
+      - name: Save bird log (CSV tracker)
+        if: ${{ github.event.inputs.dry_run != '1' }}
+        run: |
+          git config user.name "bird-agent"
+          git config user.email "bird-agent@users.noreply.github.com"
+          git add data/log.csv || true
+          git diff --cached --quiet || (git commit -m "Update bird log" && git push)
