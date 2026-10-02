@@ -339,10 +339,15 @@ def claude_json(system, user, max_tokens=2500):
     env = os.environ.get
     provider = (env("LLM_PROVIDER") or "").lower()
     if not provider:
-        provider = "gemini" if env("GEMINI_API_KEY") else "openai" if env("OPENAI_API_KEY") else "anthropic"
-    if provider == "gemini":
+        provider = ("groq" if env("GROQ_API_KEY") else
+                    "gemini" if env("GEMINI_API_KEY") else
+                    "openai" if env("OPENAI_API_KEY") else "anthropic")
+    if provider == "groq":
+        txt = _chat_compat("https://api.groq.com/openai/v1/chat/completions",
+                           env("GROQ_API_KEY"), env("GROQ_MODEL") or "llama-3.3-70b-versatile", system, user)
+    elif provider == "gemini":
         txt = _chat_compat("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
-                           env("GEMINI_API_KEY"), env("GEMINI_MODEL") or "gemini-flash-latest", system, user)
+                           env("GEMINI_API_KEY"), env("GEMINI_MODEL") or "gemini-2.5-flash-lite", system, user)
     elif provider == "openai":
         txt = _chat_compat("https://api.openai.com/v1/chat/completions", env("OPENAI_API_KEY"),
                            env("OPENAI_MODEL") or "gpt-4o-mini", system, user)
