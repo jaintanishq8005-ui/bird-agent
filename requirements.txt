@@ -1,0 +1,4 @@
+requests>=2.31
+anthropic>=0.40
+gspread>=6.0
+google-auth>=2.30
