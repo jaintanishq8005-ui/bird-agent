@@ -344,7 +344,7 @@ def claude_json(system, user, max_tokens=2500):
                     "openai" if env("OPENAI_API_KEY") else "anthropic")
     if provider == "groq":
         txt = _chat_compat("https://api.groq.com/openai/v1/chat/completions",
-                           env("GROQ_API_KEY"), env("GROQ_MODEL") or "llama-3.3-70b-versatile", system, user)
+                           env("GROQ_API_KEY"), env("GROQ_MODEL") or "openai/gpt-oss-20b", system, user)
     elif provider == "gemini":
         txt = _chat_compat("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
                            env("GEMINI_API_KEY"), env("GEMINI_MODEL") or "gemini-2.5-flash-lite", system, user)
